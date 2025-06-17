@@ -1,0 +1,99 @@
+global:
+  image:
+    tag: "v2.11.1"
+  # need to change back to argocd.beraucoal.co.id later
+  domain: "argocd-dev.asseto.ai"
+server:
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: false
+  replicas: 1
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 600
+    targetMemoryUtilizationPercentage: 200
+  serviceAccount:
+    create: true
+    name: dev-argocd-server
+    annotations: {eks.amazonaws.com/role-arn: arn:aws:iam::707728974508:role/Dev-ArgoCDRole} # the role created from argo_cd_iam_role.tf
+    automountServiceAccountToken: true
+  
+  resources:
+    requests:
+      cpu: 125m
+      memory: 256Mi
+    limits:
+      cpu: 750m
+      memory: 1024Mi
+
+controller:
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: false
+  args:
+    repoServerTimeoutSeconds: "240"
+  replicas: 1
+  serviceAccount:
+    create: true
+    name: dev-argocd-application-controller
+    annotations: {eks.amazonaws.com/role-arn: arn:aws:iam::707728974508:role/Dev-ArgoCDRole} # the role created from argo_cd_iam_role.tf
+    automountServiceAccountToken: true
+
+notifications:
+  enabled: false
+
+repoServer:
+  extraArgs:
+    - "--parallelismlimit=2"
+
+  metrics:
+    enabled: false
+    serviceMonitor:
+      enabled: false
+
+  replicas: 1
+
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 600
+    targetMemoryUtilizationPercentage: 200
+
+  resources:
+    requests:
+      cpu: 125m
+      memory: 256Mi
+    limits:
+      cpu: 750m
+      memory: 1024Mi
+
+configs:
+  params:
+    server.insecure: true
+    dexserver.disable.tls: true
+  cm:
+    accounts.devuser: apiKey, login
+  # cm:
+    #admin.enabled: "false"
+    # dex.config: |
+    #   connectors:
+    #     - type: github
+    #       id: github
+    #       name: GitHub
+    #       config:
+    #         clientID: $argo-cd-github-oauth-apps-creds:dex-github-client-id
+    #         clientSecret: $argo-cd-github-oauth-apps-creds:dex-github-client-secret
+    #         orgs:
+    #         - name: sqesmma
+  rbac:
+    #policy.default: role:readonly
+    policy.csv: |
+      p, role:sync-only, applications, get, */*, allow
+      p, role:sync-only, applications, list, */*, allow
+      p, role:sync-only, applications, sync, */*, allow
+      g, devuser, role:sync-only
