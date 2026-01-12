@@ -22,32 +22,109 @@ The main lifecycle arguments:
 
 Here’s a **simple EC2 example** using lifecycle:
 
+# 1️⃣ `prevent_destroy` Example
+
+> **Purpose:** Prevent Terraform from accidentally destroying a critical resource.
+
 ```hcl
 provider "aws" {
   region = "us-east-1"
 }
 
-resource "aws_instance" "web" {
+resource "aws_instance" "critical_ec2" {
   ami           = "ami-0c55b159cbfafe1f0"  # Amazon Linux 2
   instance_type = "t2.micro"
 
   tags = {
-    Name = "Terraform-EC2"
+    Name = "Critical-EC2"
   }
 
-  # Lifecycle block
   lifecycle {
-    create_before_destroy = true      # Create new EC2 before destroying old one
-    prevent_destroy       = false     # Can destroy (set true to protect)
+    prevent_destroy = true
+  }
+}
+```
+
+### How it works:
+
+* If you run `terraform destroy`, Terraform **will fail** for this resource.
+* Protects production servers from accidental deletion ✅
+
+---
+
+# 2️⃣ `ignore_changes` Example
+
+> **Purpose:** Ignore updates to specific attributes that may change outside Terraform (like tags).
+
+```hcl
+provider "aws" {
+  region = "us-east-1"
+}
+
+resource "aws_instance" "ignore_ec2" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "Ignore-EC2"
+    Env  = "Dev"
+  }
+
+  lifecycle {
     ignore_changes = [
-      tags["Name"]                    # Ignore tag changes (won’t update EC2)
+      tags["Env"]   # Terraform will ignore any manual changes to this tag
     ]
   }
 }
 ```
 
+### How it works:
+
+* If someone changes `Env` tag in AWS console, Terraform **won’t try to revert it**.
+* Useful for attributes managed manually or by other tools ✅
+
 ---
 
+# 3️⃣ `create_before_destroy` Example
+
+> **Purpose:** Avoid downtime by creating a new resource before deleting the old one.
+
+```hcl
+provider "aws" {
+  region = "us-east-1"
+}
+
+resource "aws_instance" "before_destroy_ec2" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "BeforeDestroy-EC2"
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+```
+
+### How it works:
+
+* If you change `instance_type` from `t2.micro` → `t2.small`
+* Terraform will **create the new EC2 first**, then **destroy the old EC2**
+* No downtime for critical resources ✅
+
+---
+
+## 🔹 Quick Summary
+
+| Lifecycle Argument      | Effect                                                          |
+| ----------------------- | --------------------------------------------------------------- |
+| `prevent_destroy`       | Protect resource from accidental deletion                       |
+| `ignore_changes`        | Ignore changes to attributes that are managed outside Terraform |
+| `create_before_destroy` | Create new resource before deleting old one to avoid downtime   |
+
+---
 ## 3️⃣ How It Works
 
 1. `create_before_destroy = true`
