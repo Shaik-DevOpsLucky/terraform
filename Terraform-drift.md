@@ -149,6 +149,7 @@ backend "s3" {
   key            = "prod/infra.tfstate"
   region         = "us-east-1"
   dynamodb_table = "terraform-locks"
+  #use_lockfile = true ##If you are not using dynamodb you can use this argument
 }
 ```
 
@@ -302,6 +303,15 @@ This will:
 > `terraform apply` enforces **t2.large**.
 
 ---
+<img width="1039" height="511" alt="image" src="https://github.com/user-attachments/assets/06928a47-4cc7-490e-96d2-65240bdc8378" />
+---
+<img width="1045" height="512" alt="image" src="https://github.com/user-attachments/assets/fab13d00-e013-42b7-b688-2c8637eacf5f" />
+---
+<img width="1049" height="518" alt="image" src="https://github.com/user-attachments/assets/c5613207-a72f-4b5e-8c70-c8e9c0bdf86f" />
+---
+
+
+
 
 ## Prepared by
 ## **Shaik Moulali**
