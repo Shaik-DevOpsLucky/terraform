@@ -69,6 +69,19 @@ terraform {
   }
 }
 ```
+##**OR**
+
+```hcl
+terraform {
+  backend "s3" {
+    bucket         = "my-terraform-state"
+    key            = "prod/terraform.tfstate"
+    region         = "us-east-1"
+    use_lockfile   = true
+  }
+}
+```
+
 
 * `dynamodb_table` → used to **acquire the lock**
 * Terraform automatically locks the state when applying changes
