@@ -69,7 +69,7 @@ terraform {
   }
 }
 ```
-##**OR**
+**OR**
 
 ```hcl
 terraform {
