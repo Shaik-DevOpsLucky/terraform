@@ -1,9 +1,5 @@
 ## how to use depends_on module? how it works and when to use?
 ---
-Great question 👍
-`depends_on` with **Terraform modules** is an **important concept** and often misunderstood. I’ll explain it **clearly**, with **how it works, when to use it, and real examples**.
-
----
 
 # Terraform `depends_on` with Modules – Explained Clearly 🚀
 
